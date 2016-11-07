@@ -1,6 +1,6 @@
 {
   "name": "runtask",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Very simple task runner",
   "main": "index.js",
   "scripts": {
