@@ -101,6 +101,14 @@ test('error if running task that doesnt exist', (t) => {
   });
 });
 
+test('throw error if no callback', (t) => {
+  t.plan(1);
+  const runner = new RunTask();
+  t.throws(() => {
+    runner.run('hi');
+  });
+});
+
 test('run class with execute function', (t) => {
   t.plan(1);
   class Test {

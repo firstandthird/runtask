@@ -30,7 +30,14 @@ class RunTask {
     if (typeof tasks === 'string') {
       tasks = [tasks];
     }
-    async.eachSeries(tasks, this.runOne.bind(this), done);
+    async.eachSeries(tasks, this.runOne.bind(this), (err) => {
+      if (typeof done === 'function') {
+        return done(err);
+      }
+      if (err) {
+        throw err;
+      }
+    });
   }
 }
 
