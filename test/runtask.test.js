@@ -137,3 +137,24 @@ test('be able to set array of tasks', (t) => {
   runner.run('test');
 });
 
+test('if you pass in a task alias, then make sure first array is run in series', (t) => {
+  t.plan(4);
+  const runner = new RunTask();
+  let count = 0;
+  runner.register('test1', (done) => {
+    setTimeout(() => {
+      t.equal(count, 0, 'test1 ran first');
+      count++;
+      t.pass('test1 called');
+      done();
+    });
+  });
+  runner.register('test2', (done) => {
+    t.equal(count, 1, 'test1 ran first');
+    t.pass('test2 called');
+    done();
+  });
+  runner.register('test', ['test1', 'test2']);
+  runner.run('test');
+});
+
