@@ -29,7 +29,7 @@ class RunTask {
 
   run(tasks, done) {
     if (typeof tasks === 'string') {
-      tasks = [tasks];
+      tasks = this.tasks[tasks];
     }
     async.eachSeries(tasks, this.runOne.bind(this), (err) => {
       if (typeof done === 'function') {
