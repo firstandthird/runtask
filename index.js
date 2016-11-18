@@ -28,8 +28,18 @@ class RunTask {
   }
 
   run(tasks, done) {
+    // a string can be either the name of a single task function or class
+    // or the name of a list of task functions / classes
     if (typeof tasks === 'string') {
-      tasks = this.tasks[tasks];
+      // if it's a list already it doesn't need to be cast:
+      if (this.tasks[tasks] && Array.isArray(this.tasks[tasks])) {
+        tasks = this.tasks[tasks];
+      } else {
+        tasks = [tasks];
+      }
+    }
+    if (!tasks) {
+      return done(new Error(`${tasks} does not exist`));
     }
     async.eachSeries(tasks, this.runOne.bind(this), (err) => {
       if (typeof done === 'function') {
