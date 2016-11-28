@@ -158,3 +158,55 @@ test('if you pass in a task alias, then make sure first array is run in series',
   runner.run('test');
 });
 
+
+test('complex alias example', (t) => {
+  t.plan(5);
+  const runner = new RunTask();
+  let count = 0;
+
+  runner.register('series1', (done) => {
+    setTimeout(() => {
+      t.equal(count, 0, 'series 1 ran first');
+      count++;
+      done();
+    }, 1);
+  });
+
+  runner.register('parallel1', (done) => {
+    setTimeout(() => {
+      t.equal(count, 2, 'parallel 1 ran second');
+      count++;
+      done();
+    }, 2);
+  });
+
+  runner.register('parallel2', (done) => {
+    setTimeout(() => {
+      t.equal(count, 3, 'parallel 2 ran third');
+      count++;
+      done();
+    }, 3);
+  });
+
+  runner.register('parallel3', (done) => {
+    setTimeout(() => {
+      t.equal(count, 1, 'parallel 1 ran first');
+      count++;
+      done();
+    }, 1);
+  });
+
+  runner.register('series2', (done) => {
+    setTimeout(() => {
+      t.equal(count, 4, 'series2 ran after all parallel finished');
+      count++;
+      done();
+    }, 1);
+  });
+
+  runner.register('complex', [
+    'series1', ['parallel1', 'parallel2', 'parallel3'], 'series2'
+  ]);
+  runner.run('complex');
+});
+
