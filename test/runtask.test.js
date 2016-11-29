@@ -221,7 +221,7 @@ test('nested alias', (t) => {
       t.equal(count, 0, 'series 1 ran first');
       count++;
       done();
-    }, 2);
+    }, 5);
   });
 
   runner.register('parallel1', (done) => {
