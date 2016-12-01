@@ -41,6 +41,11 @@ class RunTask {
   }
 
   run(tasks, data, done) {
+    // data param is optional:
+    if (typeof data === 'function') {
+      done = data;
+      data = {};
+    }
     // a string can be either the name of a single task function or class
     // or the name of a list of task functions / classes
     if (typeof tasks === 'string') {

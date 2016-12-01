@@ -17,7 +17,7 @@ test('runs basic fn', (t) => {
     done();
   });
 
-  runner.run('test', {}, () => {
+  runner.run('test', () => {
     t.pass('run callback is called');
   });
 });
@@ -29,7 +29,7 @@ test('run callback not required', (t) => {
     t.pass('fn is called');
     done();
   });
-  runner.run(['test'], {});
+  runner.run(['test']);
 });
 
 test('can pass in string to run', (t) => {
@@ -40,7 +40,7 @@ test('can pass in string to run', (t) => {
     done();
   });
 
-  runner.run('test', {});
+  runner.run('test');
 });
 
 test('runs in series', (t) => {
@@ -87,7 +87,7 @@ test('nested parallel tasks', (t) => {
     count++;
     done();
   });
-  runner.run([[['test', 'test'], 'test']], {}, () => {
+  runner.run([[['test', 'test'], 'test']], () => {
     t.equal(count, 3, 'test ran 3 times');
   });
 });
@@ -95,7 +95,7 @@ test('nested parallel tasks', (t) => {
 test('error if running task that doesnt exist', (t) => {
   t.plan(1);
   const runner = new RunTask();
-  runner.run('hi', {}, (err) => {
+  runner.run('hi', (err) => {
     t.ok(err instanceof Error);
   });
 });
@@ -103,7 +103,7 @@ test('throw error if no callback', (t) => {
   t.plan(1);
   const runner = new RunTask();
   t.throws(() => {
-    runner.run('hi', {});
+    runner.run('hi');
   });
 });
 
@@ -203,7 +203,7 @@ test('complex alias example', (t) => {
   runner.register('complex', [
     'series1', ['parallel1', 'parallel2', 'parallel3'], 'series2'
   ]);
-  runner.run('complex', {});
+  runner.run('complex');
 });
 test('nested alias', (t) => {
   t.plan(4);
@@ -243,7 +243,7 @@ test('nested alias', (t) => {
   });
   runner.register('alias1', ['series1', ['parallel1', 'parallel2']]);
   runner.register('nested', ['alias1', 'series2']);
-  runner.run('nested', {});
+  runner.run('nested');
 });
 
 test('onStart and onFinish', (t) => {
@@ -264,7 +264,7 @@ test('onStart and onFinish', (t) => {
     count++;
     done();
   });
-  runner.run('thing', {});
+  runner.run('thing');
 });
 test('onStart and onFinish for classes', (t) => {
   t.plan(4);
@@ -287,7 +287,7 @@ test('onStart and onFinish for classes', (t) => {
     }
   }
   runner.register('test', new Test());
-  runner.run('test', {});
+  runner.run('test');
 });
 
 test('function will take in data options', (t) => {
