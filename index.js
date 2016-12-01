@@ -4,14 +4,8 @@ const async = require('async');
 class RunTask {
   constructor(options) {
     this.tasks = {};
-    if (options) {
-      if (options.onStart) {
-        this.onStart = options.onStart;
-      }
-      if (options.onFinish) {
-        this.onFinish = options.onFinish;
-      }
-    }
+    this.onStart = options && options.onStart || function() { };
+    this.onFinish = options && options.onFinish || function() { };
   }
 
   register(name, fn) {
@@ -27,13 +21,9 @@ class RunTask {
       return done(new Error(`${task} does not exist`));
     }
     if (typeof fn.execute === 'function') {
-      if (this.onStart) {
-        this.onStart(task.name, task);
-      }
+      this.onStart(task.name, task);
       return fn.execute((err, result) => {
-        if (this.onFinish) {
-          this.onFinish(task.name, task);
-        }
+        this.onFinish(task.name, task);
         return done(err, result);
       });
     }
@@ -66,7 +56,6 @@ class RunTask {
       }
     });
   }
-
 }
 
 module.exports = RunTask;
