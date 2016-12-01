@@ -254,3 +254,25 @@ test('nested alias', (t) => {
   runner.run('nested');
 });
 
+test('function will take in data options', (t) => {
+  t.plan(1);
+  const runner = new RunTask();
+  runner.register('test', (data, done) => {
+    t.equal(data.data1, 'yes', 'data is passed');
+    done();
+  });
+  runner.run('test', { data1: 'yes' });
+});
+
+test('run class with execute function will take in data options', (t) => {
+  t.plan(1);
+  class Test {
+    execute(data, done) {
+      t.equal(data.data1, 'yes', 'data is passed to class');
+      done();
+    }
+  }
+  const runner = new RunTask();
+  runner.register('test', new Test());
+  runner.run('test', { data1: 'yes' });
+});
