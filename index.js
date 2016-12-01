@@ -18,7 +18,7 @@ class RunTask {
     const onFinish = this.onFinish;
     if (Array.isArray(task)) {
       return async.each(task, (taskItem, eachDone) => {
-        this.runOne.bind(this)(taskItem, data, eachDone);
+        this.runOne(taskItem, data, eachDone);
       }, done);
     }
     const fn = this.tasks[task];
@@ -55,7 +55,7 @@ class RunTask {
       return done(new Error(`${tasks} does not exist`));
     }
     async.eachSeries(tasks, (task, eachDone) => {
-      this.runOne.bind(this)(task, data, eachDone);
+      this.runOne(task, data, eachDone);
     }, (err) => {
       if (typeof done === 'function') {
         return done(err);
