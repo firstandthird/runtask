@@ -13,11 +13,13 @@ class RunTask {
     this.tasks[name] = fn;
   }
 
-  runOne(task, done) {
+  runOne(task, data, done) {
     const onStart = this.onStart;
     const onFinish = this.onFinish;
     if (Array.isArray(task)) {
-      return async.each(task, this.runOne.bind(this), done);
+      return async.each(task, (taskItem, eachDone) => {
+        this.runOne.bind(this)(taskItem, data, eachDone);
+      }, done);
     }
     const fn = this.tasks[task];
     if (!fn) {
@@ -25,20 +27,20 @@ class RunTask {
     }
     if (typeof fn.execute === 'function') {
       onStart(task);
-      return fn.execute((err, result) => {
+      return fn.execute(data, (err, result) => {
         onFinish(task);
         return done(err, result);
       });
     }
     if (Array.isArray(fn)) {
-      return this.runOne(fn, done);
+      return this.runOne(fn, data, done);
     }
     onStart(task);
-    fn(done);
+    fn(data, done);
     onFinish(task);
   }
 
-  run(tasks, done) {
+  run(tasks, data, done) {
     // a string can be either the name of a single task function or class
     // or the name of a list of task functions / classes
     if (typeof tasks === 'string') {
@@ -52,7 +54,9 @@ class RunTask {
     if (!tasks) {
       return done(new Error(`${tasks} does not exist`));
     }
-    async.eachSeries(tasks, this.runOne.bind(this), (err) => {
+    async.eachSeries(tasks, (task, eachDone) => {
+      this.runOne.bind(this)(task, data, eachDone);
+    }, (err) => {
       if (typeof done === 'function') {
         return done(err);
       }
