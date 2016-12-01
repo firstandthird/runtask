@@ -1,7 +1,6 @@
 'use strict';
 const test = require('tape');
 const RunTask = require('../');
-
 test('setup', (t) => {
   t.plan(3);
   t.equal(typeof RunTask.constructor, 'function', 'RunTask is a class');
@@ -13,12 +12,12 @@ test('setup', (t) => {
 test('runs basic fn', (t) => {
   t.plan(2);
   const runner = new RunTask();
-  runner.register('test', (done) => {
+  runner.register('test', (data, done) => {
     t.pass('fn is called');
     done();
   });
 
-  runner.run('test', () => {
+  runner.run('test', {}, () => {
     t.pass('run callback is called');
   });
 });
@@ -26,35 +25,34 @@ test('runs basic fn', (t) => {
 test('run callback not required', (t) => {
   t.plan(1);
   const runner = new RunTask();
-  runner.register('test', (done) => {
+  runner.register('test', (data, done) => {
     t.pass('fn is called');
     done();
   });
-
-  runner.run(['test']);
+  runner.run(['test'], {});
 });
 
 test('can pass in string to run', (t) => {
   t.plan(1);
   const runner = new RunTask();
-  runner.register('test', (done) => {
+  runner.register('test', (data, done) => {
     t.pass('fn is called');
     done();
   });
 
-  runner.run('test');
+  runner.run('test', {});
 });
 
 test('runs in series', (t) => {
   t.plan(2);
   const runner = new RunTask();
   let count = 0;
-  runner.register('test1', (done) => {
+  runner.register('test1', (data, done) => {
     t.equal(count, 0, 'test1 is called first');
     count++;
     done();
   });
-  runner.register('test2', (done) => {
+  runner.register('test2', (data, done) => {
     t.equal(count, 1, 'test2 is called second');
     done();
   });
@@ -66,13 +64,13 @@ test('runs in series and parallel', (t) => {
   t.plan(2);
   const runner = new RunTask();
   let count = 0;
-  runner.register('test1', (done) => {
+  runner.register('test1', (data, done) => {
     setTimeout(() => {
       t.equal(count, 1, 'test1 is called');
       done();
     }, 1);
   });
-  runner.register('test2', (done) => {
+  runner.register('test2', (data, done) => {
     t.equal(count, 0, 'test2 is called');
     count++;
     done();
@@ -85,11 +83,11 @@ test('nested parallel tasks', (t) => {
   t.plan(1);
   const runner = new RunTask();
   let count = 0;
-  runner.register('test', (done) => {
+  runner.register('test', (data, done) => {
     count++;
     done();
   });
-  runner.run([[['test', 'test'], 'test']], () => {
+  runner.run([[['test', 'test'], 'test']], {}, () => {
     t.equal(count, 3, 'test ran 3 times');
   });
 });
@@ -97,23 +95,22 @@ test('nested parallel tasks', (t) => {
 test('error if running task that doesnt exist', (t) => {
   t.plan(1);
   const runner = new RunTask();
-  runner.run('hi', (err) => {
+  runner.run('hi', {}, (err) => {
     t.ok(err instanceof Error);
   });
 });
-
 test('throw error if no callback', (t) => {
   t.plan(1);
   const runner = new RunTask();
   t.throws(() => {
-    runner.run('hi');
+    runner.run('hi', {});
   });
 });
 
 test('run class with execute function', (t) => {
   t.plan(1);
   class Test {
-    execute(done) {
+    execute(data, done) {
       t.pass('class.execute is called');
       done();
     }
@@ -126,23 +123,22 @@ test('run class with execute function', (t) => {
 test('be able to set array of tasks', (t) => {
   t.plan(2);
   const runner = new RunTask();
-  runner.register('test1', (done) => {
+  runner.register('test1', (data, done) => {
     t.pass('test1 called');
     done();
   });
-  runner.register('test2', (done) => {
+  runner.register('test2', (data, done) => {
     t.pass('test2 called');
     done();
   });
   runner.register('test', ['test1', 'test2']);
   runner.run('test');
 });
-
 test('if you pass in a task alias, then make sure first array is run in series', (t) => {
   t.plan(4);
   const runner = new RunTask();
   let count = 0;
-  runner.register('test1', (done) => {
+  runner.register('test1', (data, done) => {
     setTimeout(() => {
       t.equal(count, 0, 'test1 ran first');
       count++;
@@ -150,7 +146,7 @@ test('if you pass in a task alias, then make sure first array is run in series',
       done();
     });
   });
-  runner.register('test2', (done) => {
+  runner.register('test2', (data, done) => {
     t.equal(count, 1, 'test1 ran first');
     t.pass('test2 called');
     done();
@@ -164,7 +160,7 @@ test('complex alias example', (t) => {
   const runner = new RunTask();
   let count = 0;
 
-  runner.register('series1', (done) => {
+  runner.register('series1', (data, done) => {
     setTimeout(() => {
       t.equal(count, 0, 'series 1 ran first');
       count++;
@@ -172,7 +168,7 @@ test('complex alias example', (t) => {
     }, 5);
   });
 
-  runner.register('parallel1', (done) => {
+  runner.register('parallel1', (data, done) => {
     setTimeout(() => {
       t.equal(count, 2, 'parallel 1 ran second');
       count++;
@@ -180,7 +176,7 @@ test('complex alias example', (t) => {
     }, 2);
   });
 
-  runner.register('parallel2', (done) => {
+  runner.register('parallel2', (data, done) => {
     setTimeout(() => {
       t.equal(count, 3, 'parallel 2 ran third');
       count++;
@@ -188,7 +184,7 @@ test('complex alias example', (t) => {
     }, 3);
   });
 
-  runner.register('parallel3', (done) => {
+  runner.register('parallel3', (data, done) => {
     setTimeout(() => {
       t.equal(count, 1, 'parallel 1 ran first');
       count++;
@@ -196,7 +192,7 @@ test('complex alias example', (t) => {
     }, 1);
   });
 
-  runner.register('series2', (done) => {
+  runner.register('series2', (data, done) => {
     setTimeout(() => {
       t.equal(count, 4, 'series2 ran after all parallel finished');
       count++;
@@ -207,15 +203,14 @@ test('complex alias example', (t) => {
   runner.register('complex', [
     'series1', ['parallel1', 'parallel2', 'parallel3'], 'series2'
   ]);
-  runner.run('complex');
+  runner.run('complex', {});
 });
-
 test('nested alias', (t) => {
   t.plan(4);
   const runner = new RunTask();
   let count = 0;
 
-  runner.register('series1', (done) => {
+  runner.register('series1', (data, done) => {
     setTimeout(() => {
       t.equal(count, 0, 'series 1 ran first');
       count++;
@@ -223,7 +218,7 @@ test('nested alias', (t) => {
     }, 5);
   });
 
-  runner.register('parallel1', (done) => {
+  runner.register('parallel1', (data, done) => {
     setTimeout(() => {
       t.equal(count, 2, 'parallel 1 ran second');
       count++;
@@ -231,7 +226,7 @@ test('nested alias', (t) => {
     }, 3);
   });
 
-  runner.register('parallel2', (done) => {
+  runner.register('parallel2', (data, done) => {
     setTimeout(() => {
       t.equal(count, 1, 'parallel 2 ran first');
       count++;
@@ -239,18 +234,16 @@ test('nested alias', (t) => {
     }, 2);
   });
 
-  runner.register('series2', (done) => {
+  runner.register('series2', (data, done) => {
     setTimeout(() => {
       t.equal(count, 3, 'series2 ran after all parallel finished');
       count++;
       done();
     }, 1);
   });
-
   runner.register('alias1', ['series1', ['parallel1', 'parallel2']]);
   runner.register('nested', ['alias1', 'series2']);
-
-  runner.run('nested');
+  runner.run('nested', {});
 });
 
 test('onStart and onFinish', (t) => {
@@ -266,12 +259,12 @@ test('onStart and onFinish', (t) => {
       t.equal(count, 2, 'onFinish called second');
     }
   });
-  runner.register('thing', (done) => {
+  runner.register('thing', (data, done) => {
     t.equal(count, 1, 'onStart was called first');
     count++;
     done();
   });
-  runner.run('thing');
+  runner.run('thing', {});
 });
 test('onStart and onFinish for classes', (t) => {
   t.plan(4);
@@ -287,12 +280,35 @@ test('onStart and onFinish for classes', (t) => {
     }
   });
   class Test {
-    execute(done) {
+    execute(data, done) {
       t.equal(count, 1, 'onStart was called first');
       count++;
       done();
     }
   }
   runner.register('test', new Test());
-  runner.run('test');
+  runner.run('test', {});
+});
+
+test('function will take in data options', (t) => {
+  t.plan(1);
+  const runner = new RunTask();
+  runner.register('test', (data, done) => {
+    t.equal(data.data1, 'yes', 'data is passed');
+    done();
+  });
+  runner.run('test', { data1: 'yes' });
+});
+
+test('run class with execute function will take in data options', (t) => {
+  t.plan(1);
+  class Test {
+    execute(data, done) {
+      t.equal(data.data1, 'yes', 'data is passed to class');
+      done();
+    }
+  }
+  const runner = new RunTask();
+  runner.register('test', new Test());
+  runner.run('test', { data1: 'yes' });
 });
