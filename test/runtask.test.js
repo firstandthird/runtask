@@ -158,7 +158,6 @@ test('if you pass in a task alias, then make sure first array is run in series',
   runner.run('test');
 });
 
-
 test('complex alias example', (t) => {
   t.plan(5);
   const runner = new RunTask();
@@ -210,7 +209,6 @@ test('complex alias example', (t) => {
   runner.run('complex');
 });
 
-
 test('nested alias', (t) => {
   t.plan(4);
   const runner = new RunTask();
@@ -254,3 +252,23 @@ test('nested alias', (t) => {
   runner.run('nested');
 });
 
+test('onStart and onFinish', (t) => {
+  t.plan(1);
+  let count = 0;
+  const runner = new RunTask({
+    onStart: (name, task) => {
+      count++;
+      t.equal(name, 'thing', 'task is name');
+    },
+    onFinish: (name, task) => {
+      t.equal(name, 'thing', 'task is name');
+      t.equal(count, 1, 'onFinish called first');
+    }
+  });
+  runner.register('thing', (done) => {
+    t.equal(count, 0, 'onStart called first');
+    count++;
+    done();
+  });
+  runner.run('thing');
+});
