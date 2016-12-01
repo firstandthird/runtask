@@ -253,22 +253,45 @@ test('nested alias', (t) => {
 });
 
 test('onStart and onFinish', (t) => {
-  t.plan(1);
+  t.plan(4);
   let count = 0;
   const runner = new RunTask({
-    onStart: (name, task) => {
+    onStart: (name) => {
       count++;
       t.equal(name, 'thing', 'task is name');
     },
-    onFinish: (name, task) => {
+    onFinish: (name) => {
       t.equal(name, 'thing', 'task is name');
-      t.equal(count, 1, 'onFinish called first');
+      t.equal(count, 2, 'onFinish called second');
     }
   });
   runner.register('thing', (done) => {
-    t.equal(count, 0, 'onStart called first');
+    t.equal(count, 1, 'onStart was called first');
     count++;
     done();
   });
   runner.run('thing');
+});
+test('onStart and onFinish for classes', (t) => {
+  t.plan(4);
+  let count = 0;
+  const runner = new RunTask({
+    onStart: (name) => {
+      count++;
+      t.equal(name, 'test', 'name is test');
+    },
+    onFinish: (name) => {
+      t.equal(name, 'test', 'name is test');
+      t.equal(count, 2, 'onFinish called second');
+    }
+  });
+  class Test {
+    execute(done) {
+      t.equal(count, 1, 'onStart was called first');
+      count++;
+      done();
+    }
+  }
+  runner.register('test', new Test());
+  runner.run('test');
 });
