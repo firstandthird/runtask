@@ -52,21 +52,18 @@ class RunTask {
     }
     // if the top-level is a list of tasks, and any of those subtasks is a string referring to a list of tasks
     // that sub-list needs to be merged into the top-level list:
-    if (Array.isArray(tasks)) {
-      const newTasks = [];
-      tasks.forEach((subtask) => {
-        // if any subtasks in that array are strings that map to lists, we expand them into the top-level list:
-        if (typeof subtask === 'string' && this.tasks[subtask] && Array.isArray(this.tasks[subtask])) {
-          this.tasks[subtask].forEach((item) => {
-            newTasks.push(item);
-          });
-        // otherwise just leave it for runOne to process:
-        } else {
-          newTasks.push(subtask);
-        }
-      });
-      tasks = newTasks;
-    }
+    const newTasks = [];
+    tasks.forEach((subtask) => {
+      // if any subtasks in that array are strings that map to lists, we expand them into the top-level list:
+      if (typeof subtask === 'string' && this.tasks[subtask] && Array.isArray(this.tasks[subtask])) {
+        this.tasks[subtask].forEach((item) => {
+          newTasks.push(item);
+        });
+      } else {
+        newTasks.push(subtask);
+      }
+    });
+    tasks = newTasks;
     if (!tasks) {
       return done(new Error(`${tasks} does not exist`));
     }
