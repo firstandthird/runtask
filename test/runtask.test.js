@@ -68,7 +68,7 @@ test('runs in series and parallel', (t) => {
     setTimeout(() => {
       t.equal(count, 1, 'test1 is called');
       done();
-    }, 1);
+    }, 1000);
   });
   runner.register('test2', (data, done) => {
     t.equal(count, 0, 'test2 is called');
@@ -170,26 +170,26 @@ test('complex alias example', (t) => {
 
   runner.register('parallel1', (data, done) => {
     setTimeout(() => {
-      t.equal(count, 2, 'parallel 1 ran second');
+      t.equal(count, 3, 'parallel tasks returns after parallels2 & 3 done');
       count++;
       done();
-    }, 2);
+    }, 100);
   });
 
   runner.register('parallel2', (data, done) => {
     setTimeout(() => {
-      t.equal(count, 3, 'parallel 2 ran third');
+      t.equal(count, 1, 'parallel2 tasks returns after series1');
       count++;
       done();
-    }, 3);
+    }, 1);
   });
 
   runner.register('parallel3', (data, done) => {
     setTimeout(() => {
-      t.equal(count, 1, 'parallel 1 ran first');
+      t.equal(count, 2, 'parallel3 tasks returns after parallel2');
       count++;
       done();
-    }, 1);
+    }, 50);
   });
 
   runner.register('series2', (data, done) => {
@@ -215,23 +215,23 @@ test('nested alias', (t) => {
       t.equal(count, 0, 'series 1 ran first');
       count++;
       done();
-    }, 5);
+    }, 10);
   });
 
   runner.register('parallel1', (data, done) => {
     setTimeout(() => {
-      t.equal(count, 2, 'parallel 1 ran second');
+      t.equal(count, 2, 'parallel1 task returns after series1 and parallel2');
       count++;
       done();
-    }, 3);
+    }, 100);
   });
 
   runner.register('parallel2', (data, done) => {
     setTimeout(() => {
-      t.equal(count, 1, 'parallel 2 ran first');
+      t.equal(count, 1, 'parallel2 tasks returns after series 1 and before parallel1');
       count++;
       done();
-    }, 2);
+    }, 1);
   });
 
   runner.register('series2', (data, done) => {
