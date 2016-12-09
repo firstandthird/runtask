@@ -1,4 +1,13 @@
 
+0.0.5 / 2016-12-09
+==================
+
+  * nested aliases (#8)
+  * add travis, readme, 'use strict'; statements
+  * add onStart and onFinish
+  * added nested alias example
+  * added complex example
+
 0.0.4 / 2016-11-18
 ==================
 
