@@ -293,3 +293,13 @@ test('onStart and onFinish for classes', (t) => {
   runner.register('test', new Test());
   runner.run('test');
 });
+
+test('bind to ', (t) => {
+  t.plan(1);
+  const runner = new RunTask({ bind: { blah: '123' } });
+  function func () {
+    t.equal(this.blah, '123');
+  }
+  runner.register('test', func);
+  runner.run('test');
+});
