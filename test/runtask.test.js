@@ -1,7 +1,7 @@
 'use strict';
 const test = require('tape');
 const RunTask = require('../');
-
+/*
 test('setup', (t) => {
   t.plan(3);
   t.equal(typeof RunTask.constructor, 'function', 'RunTask is a class');
@@ -250,6 +250,16 @@ test('nested alias', (t) => {
   runner.run('nested');
 });
 
+test('bind to ', (t) => {
+  t.plan(1);
+  const runner = new RunTask({ bind: { blah: '123' } });
+  function func () {
+    t.equal(this.blah, '123');
+  }
+  runner.register('test', func);
+  runner.run('test');
+});
+
 test('onStart and onFinish', (t) => {
   t.plan(4);
   let count = 0;
@@ -270,6 +280,7 @@ test('onStart and onFinish', (t) => {
   });
   runner.run('thing');
 });
+
 test('onStart and onFinish for classes', (t) => {
   t.plan(4);
   let count = 0;
@@ -293,13 +304,41 @@ test('onStart and onFinish for classes', (t) => {
   runner.register('test', new Test());
   runner.run('test');
 });
+*/
 
-test('bind to ', (t) => {
+test('data is passed to onStart', (t) => {
   t.plan(1);
-  const runner = new RunTask({ bind: { blah: '123' } });
-  function func () {
-    t.equal(this.blah, '123');
+  const runner = new RunTask({
+    onStart: (name, data) => {
+      console.log('===')
+      console.log(name)
+      console.log(data)
+      t.equal(data, 1);
+    },
+  });
+  class Test {
+    execute(done) {
+      done(null);
+    }
   }
-  runner.register('test', func);
+  runner.register('test', new Test());
+  runner.run('test', 1);
+});
+
+test('data and result is passed to onFinish', (t) => {
+  t.plan(1);
+  const runner = new RunTask({
+    onStart: (name) => {
+    },
+    onFinish: (name, result) => {
+      t.equal(result, 1);
+    }
+  });
+  class Test {
+    execute(done) {
+      done(null, 1);
+    }
+  }
+  runner.register('test', new Test());
   runner.run('test');
 });
