@@ -118,7 +118,7 @@ test('run class with execute function', (t) => {
     }
   }
   const runner = new RunTask();
-  runner.register('test', new Test());
+  runner.register('test', new Test().execute);
   runner.run('test');
 });
 
@@ -301,7 +301,7 @@ test('onStart and onFinish for classes', (t) => {
       done();
     }
   }
-  runner.register('test', new Test());
+  runner.register('test', new Test().execute);
   runner.run('test');
 });
 
@@ -317,7 +317,7 @@ test('data is passed to onStart', (t) => {
       done(null, data);
     }
   }
-  runner.register('test', new Test());
+  runner.register('test', new Test().execute);
   runner.run('test', 1);
 });
 
@@ -334,7 +334,7 @@ test('data and result is passed to onFinish', (t) => {
       done(null, data + 1);
     }
   }
-  runner.register('test', new Test());
+  runner.register('test', new Test().execute);
   runner.run('test', 1);
 });
 
@@ -357,6 +357,6 @@ test('run class with execute function will take in data options', (t) => {
     }
   }
   const runner = new RunTask();
-  runner.register('test', new Test());
+  runner.register('test', new Test().execute);
   runner.run('test', { data1: 'yes' });
 });

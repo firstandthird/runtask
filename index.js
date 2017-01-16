@@ -22,17 +22,14 @@ class RunTask {
       }, done);
     }
     let fn = this.tasks[task];
+    if (Array.isArray(fn)) {
+      return this.runOne(fn, data, done);
+    }
     if (this.options.bind) {
-      if (typeof fn === 'function') {
-        fn = fn.bind({ blah: '123' });
-      }
+      fn = fn.bind(this.options.bind);
     }
     if (!fn) {
       return done(new Error(`${task} does not exist`));
-    }
-    fn = fn.execute ? fn.execute : fn;
-    if (Array.isArray(fn)) {
-      return this.runOne(fn, data, done);
     }
     onStart(task, data);
     fn(data, (err, result) => {
