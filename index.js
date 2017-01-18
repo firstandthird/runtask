@@ -4,9 +4,9 @@ const async = require('async');
 class RunTask {
   constructor(options) {
     this.tasks = {};
-    options = options || {};
-    this.onStart = options.onStart || function() { };
-    this.onFinish = options.onFinish || function() { };
+    this.options = options || {};
+    this.onStart = this.options.onStart || function() { };
+    this.onFinish = this.options.onFinish || function() { };
   }
 
   register(name, fn) {
@@ -21,23 +21,21 @@ class RunTask {
         this.runOne(taskItem, data, eachDone);
       }, done);
     }
-    const fn = this.tasks[task];
-    if (!fn) {
-      return done(new Error(`${task} does not exist`));
-    }
-    if (typeof fn.execute === 'function') {
-      onStart(task);
-      return fn.execute(data, (err, result) => {
-        onFinish(task);
-        return done(err, result);
-      });
-    }
+    let fn = this.tasks[task];
     if (Array.isArray(fn)) {
       return this.runOne(fn, data, done);
     }
-    onStart(task);
-    fn(data, done);
-    onFinish(task);
+    if (!fn) {
+      return done(new Error(`${task} does not exist`));
+    }
+    if (this.options.bind) {
+      fn = fn.bind(this.options.bind);
+    }
+    onStart(task, data);
+    fn(data, (err, result) => {
+      onFinish(task, data, result);
+      done(err, result);
+    });
   }
 
   run(tasks, data, done) {

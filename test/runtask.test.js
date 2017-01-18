@@ -1,6 +1,7 @@
 'use strict';
 const test = require('tape');
 const RunTask = require('../');
+
 test('setup', (t) => {
   t.plan(3);
   t.equal(typeof RunTask.constructor, 'function', 'RunTask is a class');
@@ -99,6 +100,7 @@ test('error if running task that doesnt exist', (t) => {
     t.ok(err instanceof Error);
   });
 });
+
 test('throw error if no callback', (t) => {
   t.plan(1);
   const runner = new RunTask();
@@ -116,7 +118,7 @@ test('run class with execute function', (t) => {
     }
   }
   const runner = new RunTask();
-  runner.register('test', new Test());
+  runner.register('test', new Test().execute);
   runner.run('test');
 });
 
@@ -134,6 +136,7 @@ test('be able to set array of tasks', (t) => {
   runner.register('test', ['test1', 'test2']);
   runner.run('test');
 });
+
 test('if you pass in a task alias, then make sure first array is run in series', (t) => {
   t.plan(4);
   const runner = new RunTask();
@@ -205,6 +208,7 @@ test('complex alias example', (t) => {
   ]);
   runner.run('complex');
 });
+
 test('nested alias', (t) => {
   t.plan(4);
   const runner = new RunTask();
@@ -246,6 +250,16 @@ test('nested alias', (t) => {
   runner.run('nested');
 });
 
+test('bind to ', (t) => {
+  t.plan(1);
+  const runner = new RunTask({ bind: { blah: '123' } });
+  function func () {
+    t.equal(this.blah, '123');
+  }
+  runner.register('test', func);
+  runner.run('test');
+});
+
 test('onStart and onFinish', (t) => {
   t.plan(4);
   let count = 0;
@@ -266,6 +280,7 @@ test('onStart and onFinish', (t) => {
   });
   runner.run('thing');
 });
+
 test('onStart and onFinish for classes', (t) => {
   t.plan(4);
   let count = 0;
@@ -286,8 +301,41 @@ test('onStart and onFinish for classes', (t) => {
       done();
     }
   }
-  runner.register('test', new Test());
+  runner.register('test', new Test().execute);
   runner.run('test');
+});
+
+test('data is passed to onStart', (t) => {
+  t.plan(1);
+  const runner = new RunTask({
+    onStart: (name, data) => {
+      t.equal(data, 1);
+    },
+  });
+  class Test {
+    execute(data, done) {
+      done(null, data);
+    }
+  }
+  runner.register('test', new Test().execute);
+  runner.run('test', 1);
+});
+
+test('data and result is passed to onFinish', (t) => {
+  t.plan(2);
+  const runner = new RunTask({
+    onFinish: (name, data, result) => {
+      t.equal(data, 1);
+      t.equal(result, 2);
+    }
+  });
+  class Test {
+    execute(data, done) {
+      done(null, data + 1);
+    }
+  }
+  runner.register('test', new Test().execute);
+  runner.run('test', 1);
 });
 
 test('function will take in data options', (t) => {
@@ -309,6 +357,6 @@ test('run class with execute function will take in data options', (t) => {
     }
   }
   const runner = new RunTask();
-  runner.register('test', new Test());
+  runner.register('test', new Test().execute);
   runner.run('test', { data1: 'yes' });
 });
