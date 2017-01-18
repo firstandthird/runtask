@@ -25,11 +25,11 @@ class RunTask {
     if (Array.isArray(fn)) {
       return this.runOne(fn, data, done);
     }
-    if (this.options.bind) {
-      fn = fn.bind(this.options.bind);
-    }
     if (!fn) {
       return done(new Error(`${task} does not exist`));
+    }
+    if (this.options.bind) {
+      fn = fn.bind(this.options.bind);
     }
     onStart(task, data);
     fn(data, (err, result) => {
