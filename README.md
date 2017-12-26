@@ -1,6 +1,6 @@
-# runtask
+# runtask [![Build Status](https://travis-ci.org/firstandthird/runtask.svg?branch=master)](https://travis-ci.org/firstandthird/runtask) [![Coverage Status](https://coveralls.io/repos/github/firstandthird/runtask/badge.svg?branch=master)](https://coveralls.io/github/firstandthird/runtask?branch=master)
 
-[![Build Status](https://travis-ci.org/firstandthird/runtask.svg?branch=master)](https://travis-ci.org/firstandthird/runtask)
+
 
   __runtask__ is a lightweight, easy-to-use, highly flexible task-running library.  
 
