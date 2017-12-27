@@ -1,8 +1,8 @@
 'use strict';
-const test = require('tape');
+const tap = require('tap');
 const RunTask = require('../');
 
-test('setup', (t) => {
+tap.test('setup', (t) => {
   t.plan(3);
   t.equal(typeof RunTask.constructor, 'function', 'RunTask is a class');
   const runner = new RunTask();
@@ -10,7 +10,7 @@ test('setup', (t) => {
   t.equal(typeof runner.run, 'function', 'run is a function');
 });
 
-test('runs basic fn', (t) => {
+tap.test('runs basic fn', (t) => {
   t.plan(2);
   const runner = new RunTask();
   runner.register('test', (data, done) => {
@@ -23,7 +23,7 @@ test('runs basic fn', (t) => {
   });
 });
 
-test('run callback not required', (t) => {
+tap.test('run callback not required', (t) => {
   t.plan(1);
   const runner = new RunTask();
   runner.register('test', (data, done) => {
@@ -33,7 +33,7 @@ test('run callback not required', (t) => {
   runner.run(['test']);
 });
 
-test('can pass in string to run', (t) => {
+tap.test('can pass in string to run', (t) => {
   t.plan(1);
   const runner = new RunTask();
   runner.register('test', (data, done) => {
@@ -44,7 +44,7 @@ test('can pass in string to run', (t) => {
   runner.run('test');
 });
 
-test('runs in series', (t) => {
+tap.test('runs in series', (t) => {
   t.plan(2);
   const runner = new RunTask();
   let count = 0;
@@ -61,7 +61,7 @@ test('runs in series', (t) => {
   runner.run(['test1', 'test2']);
 });
 
-test('runs in series and parallel', (t) => {
+tap.test('runs in series and parallel', (t) => {
   t.plan(2);
   const runner = new RunTask();
   let count = 0;
@@ -80,7 +80,7 @@ test('runs in series and parallel', (t) => {
   runner.run([['test1', 'test2']]);
 });
 
-test('nested parallel tasks', (t) => {
+tap.test('nested parallel tasks', (t) => {
   t.plan(1);
   const runner = new RunTask();
   let count = 0;
@@ -93,7 +93,7 @@ test('nested parallel tasks', (t) => {
   });
 });
 
-test('error if running task that doesnt exist', (t) => {
+tap.test('error if running task that doesnt exist', (t) => {
   t.plan(1);
   const runner = new RunTask();
   runner.run('hi', (err) => {
@@ -101,7 +101,7 @@ test('error if running task that doesnt exist', (t) => {
   });
 });
 
-test('throw error if no callback', (t) => {
+tap.test('throw error if no callback', (t) => {
   t.plan(1);
   const runner = new RunTask();
   t.throws(() => {
@@ -109,7 +109,7 @@ test('throw error if no callback', (t) => {
   });
 });
 
-test('run class with execute function', (t) => {
+tap.test('run class with execute function', (t) => {
   t.plan(1);
   class Test {
     execute(data, done) {
@@ -122,7 +122,7 @@ test('run class with execute function', (t) => {
   runner.run('test');
 });
 
-test('be able to set array of tasks', (t) => {
+tap.test('be able to set array of tasks', (t) => {
   t.plan(2);
   const runner = new RunTask();
   runner.register('test1', (data, done) => {
@@ -137,7 +137,7 @@ test('be able to set array of tasks', (t) => {
   runner.run('test');
 });
 
-test('if you pass in a task alias, then make sure first array is run in series', (t) => {
+tap.test('if you pass in a task alias, then make sure first array is run in series', (t) => {
   t.plan(4);
   const runner = new RunTask();
   let count = 0;
@@ -158,7 +158,7 @@ test('if you pass in a task alias, then make sure first array is run in series',
   runner.run('test');
 });
 
-test('complex alias example', (t) => {
+tap.test('complex alias example', (t) => {
   t.plan(5);
   const runner = new RunTask();
   let count = 0;
@@ -209,7 +209,7 @@ test('complex alias example', (t) => {
   runner.run('complex');
 });
 
-test('nested alias', (t) => {
+tap.test('nested alias', (t) => {
   t.plan(4);
   const runner = new RunTask();
   let count = 0;
@@ -250,7 +250,7 @@ test('nested alias', (t) => {
   runner.run('nested');
 });
 
-test('bind to ', (t) => {
+tap.test('bind to ', (t) => {
   t.plan(1);
   const runner = new RunTask({ bind: { blah: '123' } });
   function func () {
@@ -260,7 +260,7 @@ test('bind to ', (t) => {
   runner.run('test');
 });
 
-test('onStart and onFinish', (t) => {
+tap.test('onStart and onFinish', (t) => {
   t.plan(4);
   let count = 0;
   const runner = new RunTask({
@@ -281,7 +281,7 @@ test('onStart and onFinish', (t) => {
   runner.run('thing');
 });
 
-test('onStart and onFinish for classes', (t) => {
+tap.test('onStart and onFinish for classes', (t) => {
   t.plan(4);
   let count = 0;
   const runner = new RunTask({
@@ -305,7 +305,7 @@ test('onStart and onFinish for classes', (t) => {
   runner.run('test');
 });
 
-test('data is passed to onStart', (t) => {
+tap.test('data is passed to onStart', (t) => {
   t.plan(1);
   const runner = new RunTask({
     onStart: (name, data) => {
@@ -321,7 +321,7 @@ test('data is passed to onStart', (t) => {
   runner.run('test', 1);
 });
 
-test('data and result is passed to onFinish', (t) => {
+tap.test('data and result is passed to onFinish', (t) => {
   t.plan(2);
   const runner = new RunTask({
     onFinish: (name, data, result) => {
@@ -338,7 +338,7 @@ test('data and result is passed to onFinish', (t) => {
   runner.run('test', 1);
 });
 
-test('function will take in data options', (t) => {
+tap.test('function will take in data options', (t) => {
   t.plan(1);
   const runner = new RunTask();
   runner.register('test', (data, done) => {
@@ -348,7 +348,7 @@ test('function will take in data options', (t) => {
   runner.run('test', { data1: 'yes' });
 });
 
-test('run class with execute function will take in data options', (t) => {
+tap.test('run class with execute function will take in data options', (t) => {
   t.plan(1);
   class Test {
     execute(data, done) {
