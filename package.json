@@ -31,6 +31,5 @@
     "extends": "firstandthird"
   },
   "dependencies": {
-    "mkdirp-promise": "^5.0.1"
   }
 }
