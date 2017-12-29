@@ -16,10 +16,9 @@ class RunTask {
     const onStart = this.onStart;
     const onFinish = this.onFinish;
     if (Array.isArray(task)) {
-      // run each in order:
-      return task.forEach(async (taskItem) => {
-        await this.runOne(taskItem, data);
-      });
+      // tasks in a sub-group run in parallel:
+      await Promise.all(task.map(taskItem => this.runOne(taskItem, data)));
+      return;
     }
     let fn = this.tasks[task];
     if (Array.isArray(fn)) {

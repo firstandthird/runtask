@@ -146,12 +146,6 @@ tap.test('complex alias example', (t) => {
     count++;
   });
 
-  runner.register('parallel1', async(data) => {
-    await wait(100);
-    t.equal(count, 3, 'parallel tasks returns after parallels2 & 3 done');
-    count++;
-  });
-
   runner.register('parallel2', async(data) => {
     await wait(1);
     t.equal(count, 1, 'parallel2 tasks returns after series1');
@@ -161,6 +155,12 @@ tap.test('complex alias example', (t) => {
   runner.register('parallel3', async(data) => {
     await wait(50);
     t.equal(count, 2, 'parallel3 tasks returns after parallel2');
+    count++;
+  });
+
+  runner.register('parallel1', async(data) => {
+    await wait(100);
+    t.equal(count, 3, 'parallel tasks returns after parallels2 & 3 done');
     count++;
   });
 
