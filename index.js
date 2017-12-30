@@ -21,9 +21,6 @@ class RunTask {
       return;
     }
     let fn = this.tasks[task];
-    if (Array.isArray(fn)) {
-      return this.runOne(fn, data);
-    }
     if (!fn) {
       throw new Error(`${task} does not exist`);
     }
