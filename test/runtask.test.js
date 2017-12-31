@@ -2,6 +2,8 @@
 const tap = require('tap');
 const RunTask = require('../');
 
+const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+
 tap.test('setup', (t) => {
   t.plan(3);
   t.equal(typeof RunTask.constructor, 'function', 'RunTask is a class');
@@ -13,22 +15,18 @@ tap.test('setup', (t) => {
 tap.test('runs basic fn', (t) => {
   t.plan(2);
   const runner = new RunTask();
-  runner.register('test', (data, done) => {
+  runner.register('test', (data) => {
     t.pass('fn is called');
-    done();
   });
-
-  runner.run('test', () => {
-    t.pass('run callback is called');
-  });
+  runner.run('test');
+  t.pass('run callback is called');
 });
 
 tap.test('run callback not required', (t) => {
   t.plan(1);
   const runner = new RunTask();
-  runner.register('test', (data, done) => {
+  runner.register('test', (data) => {
     t.pass('fn is called');
-    done();
   });
   runner.run(['test']);
 });
@@ -36,11 +34,9 @@ tap.test('run callback not required', (t) => {
 tap.test('can pass in string to run', (t) => {
   t.plan(1);
   const runner = new RunTask();
-  runner.register('test', (data, done) => {
+  runner.register('test', (data) => {
     t.pass('fn is called');
-    done();
   });
-
   runner.run('test');
 });
 
@@ -48,14 +44,12 @@ tap.test('runs in series', (t) => {
   t.plan(2);
   const runner = new RunTask();
   let count = 0;
-  runner.register('test1', (data, done) => {
+  runner.register('test1', (data) => {
     t.equal(count, 0, 'test1 is called first');
     count++;
-    done();
   });
-  runner.register('test2', (data, done) => {
+  runner.register('test2', (data) => {
     t.equal(count, 1, 'test2 is called second');
-    done();
   });
 
   runner.run(['test1', 'test2']);
@@ -65,56 +59,44 @@ tap.test('runs in series and parallel', (t) => {
   t.plan(2);
   const runner = new RunTask();
   let count = 0;
-  runner.register('test1', (data, done) => {
-    setTimeout(() => {
-      t.equal(count, 1, 'test1 is called');
-      done();
-    }, 1000);
+  runner.register('test1', async (data) => {
+    await wait(1000);
+    t.equal(count, 1, 'test1 is called');
   });
-  runner.register('test2', (data, done) => {
+  runner.register('test2', (data) => {
     t.equal(count, 0, 'test2 is called');
     count++;
-    done();
   });
 
   runner.run([['test1', 'test2']]);
 });
 
-tap.test('nested parallel tasks', (t) => {
+tap.test('nested parallel tasks', async(t) => {
   t.plan(1);
   const runner = new RunTask();
   let count = 0;
-  runner.register('test', (data, done) => {
+  runner.register('test', (data) => {
     count++;
-    done();
   });
-  runner.run([[['test', 'test'], 'test']], () => {
-    t.equal(count, 3, 'test ran 3 times');
-  });
+  await runner.run([[['test', 'test'], 'test']]);
+  t.equal(count, 3, 'test ran 3 times');
 });
 
-tap.test('error if running task that doesnt exist', (t) => {
+tap.test('error if running task that doesnt exist', async(t) => {
   t.plan(1);
   const runner = new RunTask();
-  runner.run('hi', (err) => {
-    t.ok(err instanceof Error);
-  });
-});
-
-tap.test('throw error if no callback', (t) => {
-  t.plan(1);
-  const runner = new RunTask();
-  t.throws(() => {
-    runner.run('hi');
-  });
+  try {
+    await runner.run('hi');
+  } catch (e) {
+    t.ok(e instanceof Error);
+  }
 });
 
 tap.test('run class with execute function', (t) => {
   t.plan(1);
   class Test {
-    execute(data, done) {
+    execute(data) {
       t.pass('class.execute is called');
-      done();
     }
   }
   const runner = new RunTask();
@@ -125,13 +107,11 @@ tap.test('run class with execute function', (t) => {
 tap.test('be able to set array of tasks', (t) => {
   t.plan(2);
   const runner = new RunTask();
-  runner.register('test1', (data, done) => {
+  runner.register('test1', (data) => {
     t.pass('test1 called');
-    done();
   });
-  runner.register('test2', (data, done) => {
+  runner.register('test2', (data) => {
     t.pass('test2 called');
-    done();
   });
   runner.register('test', ['test1', 'test2']);
   runner.run('test');
@@ -141,18 +121,15 @@ tap.test('if you pass in a task alias, then make sure first array is run in seri
   t.plan(4);
   const runner = new RunTask();
   let count = 0;
-  runner.register('test1', (data, done) => {
-    setTimeout(() => {
-      t.equal(count, 0, 'test1 ran first');
-      count++;
-      t.pass('test1 called');
-      done();
-    });
+  runner.register('test1', async(data) => {
+    await wait(2000);
+    t.equal(count, 0, 'test1 ran first');
+    count++;
+    t.pass('test1 called');
   });
-  runner.register('test2', (data, done) => {
+  runner.register('test2', (data) => {
     t.equal(count, 1, 'test1 ran first');
     t.pass('test2 called');
-    done();
   });
   runner.register('test', ['test1', 'test2']);
   runner.run('test');
@@ -163,44 +140,34 @@ tap.test('complex alias example', (t) => {
   const runner = new RunTask();
   let count = 0;
 
-  runner.register('series1', (data, done) => {
-    setTimeout(() => {
-      t.equal(count, 0, 'series 1 ran first');
-      count++;
-      done();
-    }, 5);
+  runner.register('series1', async(data) => {
+    await wait(5);
+    t.equal(count, 0, 'series 1 ran first');
+    count++;
   });
 
-  runner.register('parallel1', (data, done) => {
-    setTimeout(() => {
-      t.equal(count, 3, 'parallel tasks returns after parallels2 & 3 done');
-      count++;
-      done();
-    }, 100);
+  runner.register('parallel2', async(data) => {
+    await wait(1);
+    t.equal(count, 1, 'parallel2 tasks returns after series1');
+    count++;
   });
 
-  runner.register('parallel2', (data, done) => {
-    setTimeout(() => {
-      t.equal(count, 1, 'parallel2 tasks returns after series1');
-      count++;
-      done();
-    }, 1);
+  runner.register('parallel3', async(data) => {
+    await wait(50);
+    t.equal(count, 2, 'parallel3 tasks returns after parallel2');
+    count++;
   });
 
-  runner.register('parallel3', (data, done) => {
-    setTimeout(() => {
-      t.equal(count, 2, 'parallel3 tasks returns after parallel2');
-      count++;
-      done();
-    }, 50);
+  runner.register('parallel1', async(data) => {
+    await wait(100);
+    t.equal(count, 3, 'parallel tasks returns after parallels2 & 3 done');
+    count++;
   });
 
-  runner.register('series2', (data, done) => {
-    setTimeout(() => {
-      t.equal(count, 4, 'series2 ran after all parallel finished');
-      count++;
-      done();
-    }, 1);
+  runner.register('series2', async(data) => {
+    await wait(1);
+    t.equal(count, 4, 'series2 ran after all parallel finished');
+    count++;
   });
 
   runner.register('complex', [
@@ -214,36 +181,28 @@ tap.test('nested alias', (t) => {
   const runner = new RunTask();
   let count = 0;
 
-  runner.register('series1', (data, done) => {
-    setTimeout(() => {
-      t.equal(count, 0, 'series 1 ran first');
-      count++;
-      done();
-    }, 10);
+  runner.register('series1', async(data) => {
+    await wait(10);
+    t.equal(count, 0, 'series 1 ran first');
+    count++;
   });
 
-  runner.register('parallel1', (data, done) => {
-    setTimeout(() => {
-      t.equal(count, 2, 'parallel1 task returns after series1 and parallel2');
-      count++;
-      done();
-    }, 100);
+  runner.register('parallel1', async(data) => {
+    await wait(100);
+    t.equal(count, 2, 'parallel1 task returns after series1 and parallel2');
+    count++;
   });
 
-  runner.register('parallel2', (data, done) => {
-    setTimeout(() => {
-      t.equal(count, 1, 'parallel2 tasks returns after series 1 and before parallel1');
-      count++;
-      done();
-    }, 1);
+  runner.register('parallel2', async(data) => {
+    await wait(1);
+    t.equal(count, 1, 'parallel2 tasks returns after series 1 and before parallel1');
+    count++;
   });
 
-  runner.register('series2', (data, done) => {
-    setTimeout(() => {
-      t.equal(count, 3, 'series2 ran after all parallel finished');
-      count++;
-      done();
-    }, 1);
+  runner.register('series2', async(data) => {
+    await wait(1);
+    t.equal(count, 3, 'series2 ran after all parallel finished');
+    count++;
   });
   runner.register('alias1', ['series1', ['parallel1', 'parallel2']]);
   runner.register('nested', ['alias1', 'series2']);
@@ -273,10 +232,9 @@ tap.test('onStart and onFinish', (t) => {
       t.equal(count, 2, 'onFinish called second');
     }
   });
-  runner.register('thing', (data, done) => {
+  runner.register('thing', (data) => {
     t.equal(count, 1, 'onStart was called first');
     count++;
-    done();
   });
   runner.run('thing');
 });
@@ -295,10 +253,9 @@ tap.test('onStart and onFinish for classes', (t) => {
     }
   });
   class Test {
-    execute(data, done) {
+    execute(data) {
       t.equal(count, 1, 'onStart was called first');
       count++;
-      done();
     }
   }
   runner.register('test', new Test().execute);
@@ -313,8 +270,8 @@ tap.test('data is passed to onStart', (t) => {
     },
   });
   class Test {
-    execute(data, done) {
-      done(null, data);
+    execute(data) {
+      return data;
     }
   }
   runner.register('test', new Test().execute);
@@ -330,8 +287,8 @@ tap.test('data and result is passed to onFinish', (t) => {
     }
   });
   class Test {
-    execute(data, done) {
-      done(null, data + 1);
+    execute(data) {
+      return data + 1;
     }
   }
   runner.register('test', new Test().execute);
@@ -341,9 +298,8 @@ tap.test('data and result is passed to onFinish', (t) => {
 tap.test('function will take in data options', (t) => {
   t.plan(1);
   const runner = new RunTask();
-  runner.register('test', (data, done) => {
+  runner.register('test', (data) => {
     t.equal(data.data1, 'yes', 'data is passed');
-    done();
   });
   runner.run('test', { data1: 'yes' });
 });
@@ -351,9 +307,8 @@ tap.test('function will take in data options', (t) => {
 tap.test('run class with execute function will take in data options', (t) => {
   t.plan(1);
   class Test {
-    execute(data, done) {
+    execute(data) {
       t.equal(data.data1, 'yes', 'data is passed to class');
-      done();
     }
   }
   const runner = new RunTask();

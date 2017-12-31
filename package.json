@@ -31,6 +31,5 @@
     "extends": "firstandthird"
   },
   "dependencies": {
-    "async": "^2.1.2"
   }
 }
